@@ -1,0 +1,17 @@
+---
+layout: page
+title: About Me
+description: This is what I do.
+background: '/img/bg-about.jpg'
+---
+
+I am a Senior Agile Software Development Leader with more than 20 years of
+experience in the Healthcare IT industry. Notable blend of experience in
+software development using industry dominant languages, architecture,
+research, analysis, problem solving, planning, and multitasking. Direct senior
+level developers responsible for building, enhancing, maintaining, and
+monitoring an EDI processing platform for the largest Healthcare Network in the
+United States. A lifelong learner with proven ability to collaborate across
+functional teams resulting in on-time software delivery. Skilled communicator;
+ability to interface with all levels of management, peers, clients and technical
+professionals.
