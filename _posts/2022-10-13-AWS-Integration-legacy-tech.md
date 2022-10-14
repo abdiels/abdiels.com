@@ -2,7 +2,7 @@
 layout: post
 title: "How to leverage AWS technology"
 subtitle: "to do a lift and shift migration."
-background: '/img/posts/aws-lift-and-shift/legacy-design.png'
+background: '/img/posts/aws-lift-and-shift/post-header.png'
 ---
 
 ## Introduction
