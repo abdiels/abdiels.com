@@ -3,7 +3,7 @@ email:              abdiels@gmail.com
 description:        Adventures and thoughts about software development
 author:             Abdiel E. Sanchez
 baseurl:            
-url:                "https://abdiels.github.io"
+url:                "https://abdiels.com"
 
 # Social Profiles
 twitter_username:   AbdielSR
@@ -24,3 +24,4 @@ plugins:
   - jekyll-paginate
   - jekyll-sitemap ## Uncomment this line to silently generate a sitemaps.org compliant sitemap for your Jekyll site
   - jekyll-seo-tag
+  - jekyll-last-modified-at
