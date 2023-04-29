@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Maximizing Cost Savings After a Lift and Shift Migration"
-subtitle: "to the the AWS cloud."
+subtitle: "to the AWS cloud."
 background: '/img/posts/aws-lift-and-shift/post-header.png'
 ---
 
@@ -37,27 +37,31 @@ As your cloud environment grows, it's crucial to regularly audit your resources 
 Continuously monitor your cloud resources and their associated costs using tools like [AWS Cost Explorer](https://aws.amazon.com/aws-cost-management/aws-cost-explorer/) and [Trusted Advisor](https://aws.amazon.com/premiumsupport/technology/trusted-advisor/). Set up billing alerts to keep track of your spending and identify cost-saving opportunities. Regular monitoring and reporting will help you maintain an optimized infrastructure and prevent cost overruns.
 
 8. **Using AWS Instance Scheduler**<br>
-The [AWS Instance Scheduler](https://aws.amazon.com/solutions/implementations/instance-scheduler-on-aws/) is a service that helps you reduce costs by allowing you to automatically shut down and start EC2 and RDS instances according to a predefined schedule. This is particularly useful for non-production environments, such as development and testing, where resources may not be needed outside of working hours.
+The [AWS Instance Scheduler](https://aws.amazon.com/solutions/implementations/instance-scheduler-on-aws/) is a service that helps you reduce costs by allowing you to automatically shut down and start EC2 and RDS instances according to a predefined schedule. This is particularly useful for non-production environments, such as development and testing, where resources may not be needed outside of working hours.  The resources for each environment can be schedule based on the needs of your organization.  For example, we had development on a fix scheduler every day and completely off on the weekends.  Our testing environment had different requirements; hence, we did not do a fix schedule.  We had an offshore team that tested certain areas of the system, so we kept up the resources they needed for such testing 24/7 during the week and off in the weekends.  The rest of the resources did follow a fix schedule.  As you can see, you can tailor this service based on your needs to achieve infrastructure cost savings.
 
     To use the AWS Instance Scheduler, you'll need to:
 
-    a. Set up the Instance Scheduler infrastructure: Deploy the Instance Scheduler CloudFormation template in your AWS account, which creates the necessary resources, such as AWS Lambda functions, Amazon CloudWatch events, and Amazon DynamoDB tables.
+    1. **Set up the Instance Scheduler infrastructure:** Deploy the Instance Scheduler CloudFormation template in your AWS account, which creates the necessary resources, such as AWS Lambda functions, Amazon CloudWatch events, and Amazon DynamoDB tables.  This template is provided by AWS, and you can find it in the AWS Instances Scheduler documentation pages.  Here is an overview of the resources created by the template:
 
-    b. Define schedules: Create schedules in DynamoDB that specify the desired start and stop times for your instances. You can create multiple schedules for different time zones, weekdays, or weekends.
+        ![AWS Instance Scheduler Architecture](img/posts/maximizing-cost-savings/instance-scheduler-architecture.png)
 
-    c. Tag instances: Assign tags to your EC2 and RDS instances that correspond to the schedules you've created. The Instance Scheduler will use these tags to determine which instances should be started or stopped based on the active schedule.
+    2. **Define schedules:** Create schedules in DynamoDB that specify the desired start and stop times for your instances. You can create multiple schedules for different time zones, weekdays, or weekends.  In DynamoDB you can setup Schedules and periods.  One schedule can have multiple periods.  [The documentation](https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/components.html) goes over how to setup the schedules and periods on the DynamoDB table.  [This other article](https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/sample-schedule.html) shows a sample of the scheduling that I like to include because the way it is setup is not necessarily intuitive and this can save you some time.
 
-    d. Monitor and adjust: Regularly review the Instance Scheduler logs and metrics to ensure your instances are being started and stopped as intended. Adjust your schedules and tags as needed to optimize cost savings.
+    3. **Tag instances:** Assign tags to your EC2 and RDS instances that correspond to the schedules you've created. The Instance Scheduler, via the lambda function, will use these tags to determine which instances should be started or stopped based on the active schedule.
+
+    4. **Monitor and adjust:** Review the Instance Scheduler logs and metrics to ensure your instances are being started and stopped as intended. Adjust your schedules and tags as needed to optimize cost savings based on your application and environment requirements.
 
     Keep in mind that there are some intricacies to consider when using the AWS Instance Scheduler:
 
     - Ensure that your applications can gracefully handle the shutdown and restart of instances. For example, consider implementing health checks and retry mechanisms for database connections in your application code.
-    - Take note of any dependencies between instances, such as multi-tier applications, and ensure that they are started and stopped in the correct order.
+    - Take note of any dependencies between instances, such as multi-tier applications, and ensure that they are started and stopped in the correct order.  For example, in our schedules, we setup the databases to stop 15 minutes after the EC2 instances and start 30 minutes before the EC2 instances.  This way we ensured that the databases were up by the time the instances were up and that the instances could shut down gracefully with access to the database.  That is one example, but only you would know the instances dependencies on each other and in databases so you should keep that in mind when setting up your schedules.
     - Be aware of potential data loss if you're using instance store volumes, as the data is not persistent across instance stops and starts.
     - If you're using Spot Instances, be mindful that they may be terminated by AWS when there's a capacity shortage, even if the Instance Scheduler is set to keep them running.
+    - If you are using Windows EC2 instances, the AWS Instances Scheduler supports hibernating the machines (assuming the EC2 instances were provisioned with hibernation enabled).  This might be a good choice instead of stopping the instances, especially with older software that one might be afraid that may not start correctly if just set to launch on start up.
+    - Make sure your applications start automatically when the server starts.  This might be obvious, but worth noting because you don't want to have manual intervention to start applications in all servers.  In our case we had over 70 servers.
 
-    By incorporating the AWS Instance Scheduler into your cost optimization strategy, you can further reduce costs by ensuring that instances are only running when they are needed. This will help you maximize cost savings and maintain an efficient cloud environment.
+    By incorporating the AWS Instance Scheduler into your cost optimization strategy, you can further reduce costs by ensuring that instances are only running when they are needed. This will help you maximize cost savings and maintain an efficient cloud environment.  This [article by Microtica](https://dev.to/microtica/a-step-by-step-guide-to-aws-instance-scheduler-14lj) has a simple tutorial for AWS Resource Scheduler.
 
 ## Conclusion:
 
-A "lift and shift" migration is just the beginning of your cloud journey. To fully leverage the cost-saving potential of the cloud, it's essential to optimize your resources post-migration. By right-sizing EC2 instances, utilizing reserved instances and savings plans, optimizing RDS nodes, and implementing auto scaling and spot instances, you can significantly reduce your cloud infrastructure costs. Regular monitoring and cleanup of unused resources will ensure that your cloud environment remains efficient and cost-effective in the long run.  Finally, make sure instances are only running when they need to be running by using the instance scheduler which is especially useful for non-production environments.
+A "lift and shift" migration is just the beginning of your cloud journey. To fully leverage the cost-saving potential of the cloud, it's essential to optimize your resources post-migration. By right-sizing EC2 instances, utilizing reserved instances and savings plans, optimizing RDS nodes, and implementing auto scaling and spot instances, you can significantly reduce your cloud infrastructure costs. Regular monitoring and cleanup of unused resources will ensure that your cloud environment remains efficient and cost-effective in the long run.  Finally, make sure instances are only running when they need to be running by using the AWS Instance Scheduler which is especially useful for non-production environments.  Ultimately, you must focus on refactoring your application to be more cloud native every day in order to truly take advantage of the cloud and reduce cost effortlessly.  Using these techniques, especially the AWS Instances Scheduler, we were able to save over 200K dollars a year in cloud costs.
