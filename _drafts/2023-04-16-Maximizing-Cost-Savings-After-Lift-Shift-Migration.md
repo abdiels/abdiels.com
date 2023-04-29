@@ -15,28 +15,28 @@ In this blog post, we'll explore ways to save money after a lift and shift migra
 
 My last lift and shift project had a large server footprint, plenty of local MySQL databases on many of those servers and an OLTP (Online Transaction Processing) Oracle database.  A lift and shift seldom comes with some changes to the applications anyway, especially because of security.  Being in the cloud, security is a bigger concern that on premises. Before the lift and shift there were changes done for security purposes such as securing all internal interactions such as HTTP to HTTPS or secure EJB connections.  Still considering is a lift and shift changes were kept to a minimum.  Here are some strategies to consider after doing a lift and shift migration:
 
-1. Right-sizing EC2 instances
+1. **Right-sizing EC2 instances**
 One of the most effective ways to reduce costs is by right sizing your EC2 instances. This involves selecting the appropriate instance type and size that matches your workload requirements. Monitor your instances' CPU, memory, and network usage to identify underutilized instances that can be downsized. Likewise, if you notice instances struggling to keep up with demand, you may need to upsize them for better performance.  We had estimated ahead of time which instances we would need based on the configuration of the on-premises servers; however, after running our workload we were able to identify underutilized instances and adjust them accordingly.  We also found cases where we had to increase the instance size so they could perform the way we expected them to perform.
 
-2. Utilizing Reserved Instances and Savings Plans
+2. **Utilizing Reserved Instances and Savings Plans**
 AWS offers significant discounts for EC2 and RDS resources when you commit to using them for a longer period. By purchasing Reserved Instances (RIs) or subscribing to Savings Plans, you can achieve substantial savings compared to the on-demand pricing model. Evaluate your current and future workload requirements and choose a commitment plan that best suits your needs.
 
-3. Optimizing RDS nodes
+3. **Optimizing RDS nodes**
 Similar to EC2 instances, right sizing your RDS nodes is essential for cost optimization. Monitor database performance metrics, such as CPU utilization, connections, and storage, to determine if you can downsize your RDS nodes without compromising performance. Additionally, consider consolidating multiple databases on a single RDS instance to reduce costs.  This last point makes a huge difference.  We had originally started with two RDS nodes with different databases on them.  After some time, we noticed that we could really merge them into one node without impacting performance.  We tested it and it worked great.  The savings from that effort were significant.
 
-4. Implementing Auto Scaling
+4. **Implementing Auto Scaling**
 Auto Scaling allows you to automatically adjust the number of EC2 instances or RDS nodes based on the demand. By implementing auto scaling, you can ensure that your infrastructure scales up during peak hours and scales down during low usage periods, reducing overall costs.  This is a great way to manage your resources; however, it might depend on your applications if they are able to support auto scaling before being refactored.
 
-5. Leveraging Spot Instances
+5. **Leveraging Spot Instances**
 Spot Instances are spare EC2 instances that AWS offers at discounted rates. If your workloads can tolerate interruptions, consider using Spot Instances to save up to 90% compared to on-demand pricing. Be sure to implement a fallback strategy, such as using on-demand instances when Spot Instances are not available.
 
-6. Deleting unused resources
+6. **Deleting unused resources**
 As your cloud environment grows, it's crucial to regularly audit your resources and delete those that are no longer needed. This includes unused EC2 instances, EBS volumes, and RDS snapshots. Deleting unused resources helps to minimize storage costs and streamline your infrastructure.  You should invest in automating the creation of the infrastructure using tools such as AWS CloudFormation, Terraform, etc.  This will help on making sure you don't have unused resources left behind.  It is still a good idea to periodically audit your account for unused resources and figure out why they were left behind.  Your team should be trained to be cost conscious and adapt to the rules and realities of this new environment.
 
-7. Monitoring and reporting
+7. **Monitoring and reporting**
 Continuously monitor your cloud resources and their associated costs using tools like AWS Cost Explorer and Trusted Advisor. Set up billing alerts to keep track of your spending and identify cost-saving opportunities. Regular monitoring and reporting will help you maintain an optimized infrastructure and prevent cost overruns.
 
-8. Using AWS Instance Scheduler
+8. **Using AWS Instance Scheduler**
 The AWS Instance Scheduler is a service that helps you reduce costs by allowing you to automatically shut down and start EC2 and RDS instances according to a predefined schedule. This is particularly useful for non-production environments, such as development and testing, where resources may not be needed outside of working hours.
 
 To use the AWS Instance Scheduler, you'll need to:
