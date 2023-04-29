@@ -39,24 +39,24 @@ Continuously monitor your cloud resources and their associated costs using tools
 8. **Using AWS Instance Scheduler**<br>
 The AWS Instance Scheduler is a service that helps you reduce costs by allowing you to automatically shut down and start EC2 and RDS instances according to a predefined schedule. This is particularly useful for non-production environments, such as development and testing, where resources may not be needed outside of working hours.
 
-To use the AWS Instance Scheduler, you'll need to:
+    To use the AWS Instance Scheduler, you'll need to:
 
-a. Set up the Instance Scheduler infrastructure: Deploy the Instance Scheduler CloudFormation template in your AWS account, which creates the necessary resources, such as AWS Lambda functions, Amazon CloudWatch events, and Amazon DynamoDB tables.
+    a. Set up the Instance Scheduler infrastructure: Deploy the Instance Scheduler CloudFormation template in your AWS account, which creates the necessary resources, such as AWS Lambda functions, Amazon CloudWatch events, and Amazon DynamoDB tables.
 
-b. Define schedules: Create schedules in DynamoDB that specify the desired start and stop times for your instances. You can create multiple schedules for different time zones, weekdays, or weekends.
+    b. Define schedules: Create schedules in DynamoDB that specify the desired start and stop times for your instances. You can create multiple schedules for different time zones, weekdays, or weekends.
 
-c. Tag instances: Assign tags to your EC2 and RDS instances that correspond to the schedules you've created. The Instance Scheduler will use these tags to determine which instances should be started or stopped based on the active schedule.
+    c. Tag instances: Assign tags to your EC2 and RDS instances that correspond to the schedules you've created. The Instance Scheduler will use these tags to determine which instances should be started or stopped based on the active schedule.
 
-d. Monitor and adjust: Regularly review the Instance Scheduler logs and metrics to ensure your instances are being started and stopped as intended. Adjust your schedules and tags as needed to optimize cost savings.
+    d. Monitor and adjust: Regularly review the Instance Scheduler logs and metrics to ensure your instances are being started and stopped as intended. Adjust your schedules and tags as needed to optimize cost savings.
 
-Keep in mind that there are some intricacies to consider when using the AWS Instance Scheduler:
+    Keep in mind that there are some intricacies to consider when using the AWS Instance Scheduler:
 
-- Ensure that your applications can gracefully handle the shutdown and restart of instances. For example, consider implementing health checks and retry mechanisms for database connections in your application code.
-- Take note of any dependencies between instances, such as multi-tier applications, and ensure that they are started and stopped in the correct order.
-- Be aware of potential data loss if you're using instance store volumes, as the data is not persistent across instance stops and starts.
-- If you're using Spot Instances, be mindful that they may be terminated by AWS when there's a capacity shortage, even if the Instance Scheduler is set to keep them running.
+    - Ensure that your applications can gracefully handle the shutdown and restart of instances. For example, consider implementing health checks and retry mechanisms for database connections in your application code.
+    - Take note of any dependencies between instances, such as multi-tier applications, and ensure that they are started and stopped in the correct order.
+    - Be aware of potential data loss if you're using instance store volumes, as the data is not persistent across instance stops and starts.
+    - If you're using Spot Instances, be mindful that they may be terminated by AWS when there's a capacity shortage, even if the Instance Scheduler is set to keep them running.
 
-By incorporating the AWS Instance Scheduler into your cost optimization strategy, you can further reduce costs by ensuring that instances are only running when they are needed. This will help you maximize cost savings and maintain an efficient cloud environment.
+    By incorporating the AWS Instance Scheduler into your cost optimization strategy, you can further reduce costs by ensuring that instances are only running when they are needed. This will help you maximize cost savings and maintain an efficient cloud environment.
 
 ## Conclusion:
 
