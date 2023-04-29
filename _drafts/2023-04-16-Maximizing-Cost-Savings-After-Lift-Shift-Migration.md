@@ -43,7 +43,7 @@ The [AWS Instance Scheduler](https://aws.amazon.com/solutions/implementations/in
 
     1. **Set up the Instance Scheduler infrastructure:** Deploy the Instance Scheduler CloudFormation template in your AWS account, which creates the necessary resources, such as AWS Lambda functions, Amazon CloudWatch events, and Amazon DynamoDB tables.  This template is provided by AWS, and you can find it in the AWS Instances Scheduler documentation pages.  Here is an overview of the resources created by the template:
 
-        ![AWS Instance Scheduler Architecture](img/posts/maximizing-cost-savings/instance-scheduler-architecture.png)
+        ![AWS Instance Scheduler Architecture](/img/posts/maximizing-cost-savings/instance-scheduler-architecture.png)
 
     2. **Define schedules:** Create schedules in DynamoDB that specify the desired start and stop times for your instances. You can create multiple schedules for different time zones, weekdays, or weekends.  In DynamoDB you can setup Schedules and periods.  One schedule can have multiple periods.  [The documentation](https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/components.html) goes over how to setup the schedules and periods on the DynamoDB table.  [This other article](https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/sample-schedule.html) shows a sample of the scheduling that I like to include because the way it is setup is not necessarily intuitive and this can save you some time.
 
