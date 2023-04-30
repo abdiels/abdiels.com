@@ -2,7 +2,7 @@
 layout: post
 title: "Maximizing Cost Savings After a Lift and Shift Migration"
 subtitle: "to the AWS cloud."
-background: '/img/posts/aws-lift-and-shift/post-header.jpg'
+background: '/img/posts/maximizing-cost-savings/post-header.jpg'
 ---
 
 ## Introduction
