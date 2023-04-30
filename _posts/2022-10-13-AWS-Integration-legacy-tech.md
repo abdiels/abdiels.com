@@ -3,7 +3,7 @@ layout: post
 title: "How to leverage AWS technology"
 subtitle: "to do a lift and shift migration."
 background: '/img/posts/aws-lift-and-shift/post-header.png'
-description: "Discover how a team successfully migrated their on-premises data center to AWS using a lift-and-shift approach, overcoming challenges with older applications and leveraging AWS services. Learn from their experience and gain insights for your own cloud migration project."
+description: "Explore a real-world lift-and-shift migration to AWS, featuring the use of Amazon FSx, AWS Transfer Family, Lambda, and Storage Gateway. Learn how to tackle challenges with legacy applications and gain practical insights for your cloud migration journey."
 ---
 
 ## Introduction
