@@ -1,85 +1,49 @@
 ---
 layout: post
-title: "AWS CloudFormation"
-subtitle: "automating infrastructure."
+title: "Infrastructure as Code (IaC)"
+subtitle: "with CloudFormation and Terraform."
 background: '/img/posts/aws-lift-and-shift/post-header.png'
 ---
 
-**TODO: Insert "Executive Summary" Point to the github page where the scripts are create a readme.md that gives instructions as to the parameters needed to run the code.**
+## Introduction
 
 Everything should be automated and nothing should be done manually more than once.  Cloud computing has made it easier to setup complete infrastructure and applications.  You can write scripts to create your whole data center with the click of a button.  You can stand up anything you need and destroy it the same day.  It is now very common, but pretty amazing.
 Even if you are simply prototyping you can stand up a separate network with all the necessary subnets and security around it as you wish and then you can setup your machines or your containers to run your applications.  Everything should be scripted and automated.  This world plays real well with us lazy developers that don't like to do the same thing twice.  Usually we like the challenge of solving problems over the mundane manually repeated tasks.
+AWS provides means to automate infrastructure creation using [AWS CloudFromation](https://aws.amazon.com/cloudformation/).  This service allows you create insfrastructure as code.  [HashiCorp's Terraform](https://www.terraform.io/) is a product that allows you create your infrastructure as code; however, it works for any cloud or data center.  AWS CloudFormation is specific to AWS.
+
 This post is going to show a set of AWS CloudFormation scripts that will generate a network, a database and an application.  I have chosen to stand up a Wordpress blog since it was something I was recently looking into.
-I was inspired by this article: https://aws.amazon.com/blogs/containers/running-wordpress-amazon-ecs-fargate-ecs/ on the AWS blog.  The author shows how to setup a Wordpress blog using AWS CLI and some CloudFormation.  I have taken the same idea, but turned it all into CloudFormation.  I implemented the database using Amazon Aurora Serverless.  The complete architecture looks like this:
+I was inspired by this [AWS blog article](https://aws.amazon.com/blogs/containers/running-wordpress-amazon-ecs-fargate-ecs/).  The author shows how to setup a Wordpress blog using AWS CLI and some CloudFormation.  I have taken the same idea, but turned it all into CloudFormation.  I implemented the database using Amazon Aurora Serverless instead of the provisioned version.  I have also created the same infrastructure an applicatioin using Terraform.  In order to deploy this Wordpress application, as mentioned before, a network will created, a database and the actual application.  This is how we will organize the infrastructe scripts as those are the logical parts of what we are trying to accomplish.  I will breafly touch into what each of those logical divisions will generate.
+The complete architecture looks like this:
 
 **TODO: Insert a picture of the full architecture.**
+![Mailbox structure differences](/img/posts/aws-lift-and-shift/mailbox-layout.png)
+
+## The Tools
+
+[Insfrastructure as code (IaC)](https://en.wikipedia.org/wiki/Infrastructure_as_code) is the practice of manageing and provisioning infrastructure resources through code, rather than a manual process.  It enables you to treat infrastructure in a similar way to how you treat software.  IaC has become an esential tool, specially when it comes to deploying your applicaitons in the cloud.  There are plenty of other IaC and configuration management tools such as [Pulumi](https://www.pulumi.com/), [Ansible](https://www.ansible.com/), [Chef](https://www.chef.io/), [Puppet](https://www.puppet.com/), [SalkStack](https://saltproject.io/) and other cloud specific tools such as [Bicep for Azure](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) and [Google Cloud Deployment Manager](https://cloud.google.com/deployment-manager/docs) for the Google Could Platfrom (GCP).
+The practice of IaC is what is important, the tool you chose may depend in many factors.  Regardless of which tool you decide to use, IaC brings many advantages.  By storing infrastructure code in a version control system like Git, you can track changes, collaborate with team members, and manage the history of your infrastructure. This makes it easier to identify and fix issues, roll back to previous versions, and maintain an audit trail of changes.  IaC enables you to create consistent and repeatable environments by defining infrastructure resources in code. This reduces the risk of configuration drift and human error, leading to more stable and predictable systems.  IaC allows you to easily scale your infrastructure by modifying the code and applying the changes. This makes it easier to adapt to changing requirements, handle increased workloads, and manage resources more efficiently.  IaC automates the provisioning and management of infrastructure resources, reducing the time and effort required for manual tasks. This enables you to deploy resources faster and focus on higher-value tasks like application development and performance optimization.  The code that defines your infrastructure serves as a form of documentation, providing a clear and accurate representation of your system's architecture. This makes it easier for team members to understand the infrastructure and collaborate on changes.  IaC facilitates collaboration between team members by allowing them to review and discuss infrastructure changes through code reviews and pull requests. This helps catch potential issues early, improve the overall quality of your infrastructure, and foster a culture of shared responsibility.  IaC encourages the use of reusable modules and templates, which can be shared across different projects or teams. This promotes a modular approach to infrastructure design, reduces duplication, and makes it easier to maintain and update your infrastructure.  With IaC, you can better track and manage your infrastructure resources, which can help identify underutilized resources and optimize costs. Furthermore, the ability to quickly spin up and tear down environments means you can minimize the time resources are left unused, [further reducing costs](https://abdiels.com/2023/04/29/Maximizing-Cost-Savings-After-Lift-Shift-Migration.html).
+I have had experience with CloudFormation and Terraform, both are great tools.  The first obvious difference is that CloudFormation is designed specifically for managing AWS infrastructure resources.  Terraform is a platform agnostic tool that supports multiple cloud providers, including AWS, Google Cloud Platform (GCP), Microsoft Azure and others.  This makes Terraform more versatile option for managing infrastructure across different cloud providers.  Keep in mind that code used for different cloud providers will be specific to such providers and not reusable in others.  However, if you staff is good with Terraform, then they can manage a multi cloud setup with the same tool.
+That brings me to my next point, the language and syntax used by each tool.  CloudFormation uses JSON or YAML, I prefer YAML as it is less verbose, but the same things can be accomplished with either one.  Terrafrom uses its own language called [HashiCorp Configuration Language (HCL)](https://developer.hashicorp.com/terraform/language/syntax/configuration) which was designed specifically for describing infrastructure resources.  HCL kind of combines JSON and YAML making it easy to ready and write if you are familiar with those languages.
+Another important thing to talk about is state management, meaning how does each tool manages the state of the infrastructure you have created with each tool.  In the case of CloudFormation, AWS manages the state for you, there is place for you to worry about where the state is kept.  One less thing to worry about, except you are reliant on AWS for managing the state.  Terraform maintains a state file that keeps track of your infrastructure resources, allowing you o easily compare the desired state with the actual state.  This state file can be kept in your own machine or in a shared location such as S3 where Terraform offers features that allow a team's collaboration by providing locking of the file using a [DynamoDB](https://aws.amazon.com/dynamodb/) table.
+Like any other tools one is looking into, it is important to consider the community and ecosystem behind them as well as the learning curve for one's team to learn and implement such tool.  Needless to say, CloudFormation, being an AWS service has all the support from AWS and its community.  It comes with a large number of pre-built templates for AWS services and it is likely that new AWS services will have CloudFormation support faster than any other tool.  This is a great asset to simplify the provisioning process.  Terraform has a big growing community that contributes to its open-source codebase and creates reusable modules.  The Terraform Registry contains a large number of modules and providers that can be used for different cloud platforms and services, making it easy to find and reuse code.  In regards to the learning curve, if you are familiar with AWS services, learning CloudFormation might be easier since it uses native AWS concept and syntax.  Terraform has a more generic approach, and learning HCL migth take some time.  However, once you have learned HCL, you cna use it across different cloud platforms.  Both are well documented and after understanding certina key concepts, they are easy to pick up and use.
 
 ## The Network
 
-The previous architecture describes a Amazon Virtual Private Cloud (Amazon VPC) instantiated on an AWS region.  The VPC contains two subnets, each on different Availibity Zones.  In production or even prototyping, there is no need to create the network for each application.  There migth be reasons that one may want to keep different VPCs within the account.  I don't intend to go into VPC design or AWS account organization, but rather show an example where everything is created.
-I am also not going to cover most of the reasons for the architectural desicions on the present architecture.  I will mention the components created by the network CloudFormation. 
-As mentioned above we have:
-- A Region which is a big geographical zone that is independent from other big netwoks other big geographical zone.  When I say big, I mean of continenatal size.
-- Amazon Virtual Private Cloud (Amazon VPC) **INSERT LINK** which is a virtual network you define.
-- Two Availibility Zones.  Availibility Zones (AZ) are isolated locations within a Region.
-- Four Subnets. Subnets are a range of IP addresses in your VPC.  One of these subnets is public, which means it can be hit from outside our VPC network.  It is open to the public as its name implies.  Then there is a private subnet which is not accesible from outside of the VPC network.  Notice that there are two Subnets per AZ.
-- Internet Gateway. The Internet Gateway allows communication between the VPC and the internet.
-- A NAT Gateway. Network Address Translation (NAT) gateway is NAT service which allows instances in the private subnet to connect outside the VPC, but external sources cannot initiate a connection to the private instances.
-There are other components created by this CloudFormation template such as an EFS drive and its corresponding mount targets.
-The CloudFormation looks like this:
+The previous architecture diagram describes a [Amazon Virtual Private Cloud (Amazon VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) instantiated on an [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions).  The VPC contains four [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html), two of each on different [Availibity Zones](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-availability-zones).  In production or even prototyping, there is no need to create the network for each application.  There migth be reasons that one may want to keep different VPCs within the account.  I don't intend to go into VPC design or AWS account organization, but rather show an example where everything is created.  I am also not going to cover most of the reasons for the architectural desicions on the present architecture.  Each AZ (Availability Zone) constains two subnets, one public and one private.  The architecture uses an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) to allow internet access to the VPC's public subnets.  A [NAT Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html)  allows access to the application in the private subnets.  There are other network architecture intrincicancies that can be found in the scripts such as a [Route Tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html), [Network ACLs](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html), etc that are not in the diagram, but can be found in the corresponding scripts as parts of the architecture.
+The network layer is also defining the shared file system.  It can be debated if the shared files system is part of the "network", but in this case, it was better for me to just include it as part of the network infrastructure.  An [EFS (Amazon Elast File System)](https://aws.amazon.com/efs/) is used a persistent storage for the WordPress applicaiton.  The EFS is exposed to the applicaiton via [EFS Access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html).
 
-```
----
-  AWSTemplateFormatVersion: "2010-09-09"
+## The Database
 
-  Description: "Creates a VPC with Managed NAT, a RDS MySQL instance, an ALB, and an EFS filesystem)"
-  Parameters:
-    VPCName:
-      Description: The name of the VPC being created.
-      Type: String
-      Default: "Wordpress on Fargate base infrastructure"
+For this application, I decided to use an [Aurora Serverles](https://aws.amazon.com/rds/aurora/serverless/) [RDS](https://aws.amazon.com/rds/) database.  This will allow to save on cost as AWS will only charge for time used rather than 24/7 for the database compute resources.  The blog does not require fully allocated database resorces so this is a good use of the serverless model.  The database infrastrcutre module will also create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/security-groups.html) for the database.
 
-  Mappings:
-    SubnetConfig:
-      VPC:
-        CIDR: "10.0.0.0/16"
-      Public0:
-        CIDR: "10.0.0.0/24"
-      Public1:
-        CIDR: "10.0.1.0/24"
-      Private0:
-        CIDR: "10.0.2.0/24"
-      Private1:
-        CIDR: "10.0.3.0/24"
-```
-Here we are taking a parameter for the Name of the VPC we will be creating and defining the CIDR ranges for the VPC and its subnets. This is a good resource to learn more about CIDRs:  **TODO: Insert Resource for CIDR definition**
-The next section is the Resources section which defines all the resources to be created by the CloudFormation.  There you are going to see the VPC being created and all the information needed to create it.  Then there is the definition of all the Subnets.  After the VPC and subnets have been created the Internet Gateway is created and linked to the VPC.  Then it creates a Route Table in which all the routes in and out of the network will be defined. Notice that now that we are going to make associations of items in the CloudFormation, we need to denote which items the resrouces being created depend on as CloudFormation executes all the resources mostly simultaniously and not in sequence.  For exmample in this code:
+## The Application
 
-```
-    PublicRoute:
-      Type: "AWS::EC2::Route"
-      DependsOn: "GatewayToInternet"
-      Properties:
-        RouteTableId:
-          Ref: "PublicRouteTable"
-        DestinationCidrBlock: "0.0.0.0/0"
-        GatewayId:
-          Ref: "InternetGateway"
-```
-We are defining a public route. The route depends on a resource called GatewayToInternet:
+An [Application Load Balancer (ALB)](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) exposes the applicaton to the outside via the Internet Gateway, leveraging the NAT Gateway as well for security.  The application has a Security Group in order to expose only the needed port.  In this case we are using the unsecure HTTP connection exposing port 80.  The ALB will map that port 80 into its Target Group port 8080 which the Security Group of the ECS application exposes.  The application itself runs in a [Docker Container](https://www.docker.com/resources/what-container/#:~:text=A%20Docker%20container%20image%20is,tools%2C%20system%20libraries%20and%20settings.) using [AWS Fargate](https://aws.amazon.com/fargate/) running on [Amazon Elastic Container Service (ECS)](https://aws.amazon.com/ecs/).
 
-```
-    GatewayToInternet:
-      Type: "AWS::EC2::VPCGatewayAttachment"
-      Properties:
-        VpcId:
-          Ref: "VPC"
-        InternetGatewayId:
-          Ref: "InternetGateway"
-```
-Which is attaching the InternetGateway to the VPC.  That needs to happend in order to add a reference to the InternetGateway on the route table.
+## The code
 
+The code for this project can be found [here on github](https://github.com/abdiels/wordpress).  The code has two folders, one for a CloudFormation implementation and another for for a Terraform implementation.  It is meant to create the infrastructure discussed aboved and install a WordPress application.  You will need to point it to your AWS credentials.
 
+## Conclusion
 
- ![Mailbox structure differences](/img/posts/aws-lift-and-shift/mailbox-layout.png)
-
+At this point you have read about CloudFormation and Terraform and have seen the same application deployed on the same infrastructure provisioned by both tools.  The choice between Terraform and CloudFormation depends on many factors.  If you're working exclusively with AWS, CloudFormation might be the more appropriate choice. If you need to manage infrastructure across multiple cloud providers, Terraform's flexibility and multi-cloud support make it a more attractive option. Additionally, if you prefer a tool with a large open-source community and ecosystem, Terraform would be a better fit.  I hope that has given you some idea on the pros and cons of each tool, but more importantly, I hope it helps you embrase the Insfrastructure as code (IaC) practice.  I have mentioned multiple other tools that you can look into for this purpose.  I will end with a quote from Mike Loukides: Infrastructure as Code. "If you’re going to do operations reliably, you need to make it reproducible and programmatic."
