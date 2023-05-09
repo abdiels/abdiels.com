@@ -19,7 +19,7 @@ I was inspired by this [AWS blog article](https://aws.amazon.com/blogs/container
 
 The complete architecture looks like this:
 
-![WordPress Application](/img/posts/infrastructure-as-code/WordPress-application.png)
+![WordPress Application](/img/posts/infrastructure-as-code/wordpress-application.png)
 
 ## The Tools
 
