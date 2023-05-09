@@ -19,8 +19,7 @@ I was inspired by this [AWS blog article](https://aws.amazon.com/blogs/container
 
 The complete architecture looks like this:
 
-**TODO: Insert a picture of the full architecture.**
-![Mailbox structure differences](/img/posts/aws-lift-and-shift/mailbox-layout.png)
+![Wordpress Application](/img/posts/infrastructure-as-code/wordpress-application.png)
 
 ## The Tools
 
