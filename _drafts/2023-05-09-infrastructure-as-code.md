@@ -52,6 +52,8 @@ An [Application Load Balancer (ALB)](https://docs.aws.amazon.com/elasticloadbala
 
 The code for this project can be found [here on GitHub](https://github.com/abdiels/WordPress).  The code has two folders, one for a CloudFormation implementation and another for a Terraform implementation.  It is meant to create the infrastructure discussed above and install a WordPress application.  You will need to point it to your AWS credentials.
 
+### CloudFormation Templates
+
 Let's go over how to run the CloudFormation of the code and how to run it.  I have selected to use YAML for this example instead of JSON.  Here is a YAML of CloudForamtion snippet:
 
 ```
@@ -62,6 +64,116 @@ Resources:
 
 This snippet is not in the code, but rather meant as an example to shoe the CloudFormation syntax with a recognizable resource such as S3.  In this example, "Resources" is a section in the template where we define our AWS resources. "MyBucket" is the logical ID of the resource we're creating. Type specifies the type of resource we're creating, in this case, an S3 bucket.
 
+After defining your infrastructure in a CloudFormation template, you then create a CloudFormation stack. A **stack** is essentially a collection of AWS resources that you create and manage as a single unit. All the resources in a stack are defined by the stack's CloudFormation template.  **Parameters** in a CloudFormation template allow you to input custom values to your template each time you create or update a stack. They make your template code reusable because you can keep resource configurations in your template generic, then customize each stack creation with different parameter input values.  Outputs are optional values that you can include in a CloudFormation template to return information about the resources in your stack. For example, the Amazon Resource Name (ARN) or DNS name of a created resource. This is a snippet from the code provided:
+
+```
+Resources:
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://<my_bucket>/cf-templates/wordpress-network.yaml
+      Parameters:
+        VPCName: "WordpressBlogVPC"
+
+  DatabaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://<my_bucket>/cf-templates/wordpress-db.yaml
+      Parameters:
+        VpcId: !GetAtt NetworkStack.Outputs.VPCId
+        DBSubnetGroupName: !GetAtt NetworkStack.Outputs.DBSubnetGroup
+```
+
+Here we are creating two reources of type **stack**, these are [netsted stacks](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-nested-stacks.html).  The stacks get creted based on the resources defined in the provided templates which are hosted in S3.  Notice the **parameters**, those are the inputs required for such templates. It is also important to highlight that in the parameters for the DatabaseStack, we are using the **Outputs** of the NetworkStack.  CloudFormation also uses **Mappings** which allow you to map keys to a set of corresponding values, which can be used to conditionally create resources based on the input to the template.  Here is a snipped of the provided code in the wordpress-network.yaml:
+
+```
+  Mappings:
+    SubnetConfig:
+      VPC:
+        CIDR: "10.0.0.0/16"
+      Public0:
+        CIDR: "10.0.0.0/24"
+      Public1:
+        CIDR: "10.0.1.0/24"
+      Private0:
+        CIDR: "10.0.2.0/24"
+      Private1:
+        CIDR: "10.0.3.0/24"
+```
+
+These mappings are later use in the same file like this:
+
+```
+    PublicSubnet0:
+      Type: "AWS::EC2::Subnet"
+      Properties:
+        VpcId:
+          Ref: "VPC"
+        AvailabilityZone:
+          <!-- Other code -->
+        CidrBlock:
+          Fn::FindInMap:
+            - "SubnetConfig"
+            - "Public0"
+            - "CIDR"
+```
+
+There are other constructs that you should look into such as Conditions and Transform, but although I did not use those in this example, they are worth mentioning.  In order to find template reference and many other information that will help build your own CloudFormation templates please refer to the [AWS CloudFormation user guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html).  Now, let's focus on how to run the CloudFormation Templates.
+
+<!-- TODO: Add some screen shots and stuff here on how to run this!! -->
+
+### Terraform Scripts
+
+Since Terraform is a multicloud tool, it uses a provider model. Each provider is an IaC representation of a cloud or a service. Providers are responsible for understanding API interactions and exposing resources. There are hundreds of providers for Terraform, including AWS, Azure, Google Cloud, GitHub, and more. Terraform supports the use of modules to organize and reuse code. A module is a container for multiple resources used together. Terraform Registry provides numerous pre-made modules that you can use.  This is similar to our nested stacks in CloudFormation.
+To use Terraform you must [install it on your local machine or your chosen environment](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli).  
+
+HCL is primarily composed of blocks, arguments, and expressions. Here's a simple example of what HCL looks like:
+
+```
+resource "aws_instance" "example" {
+  ami           = "ami-0c94855ba95c574c8"
+  instance_type = "t2.micro"
+}
+```
+
+In this example, "resource" is a block type, "aws_instance" is the "block label", and "example" is the "identifier" for this instance. The block itself contains two arguments: "ami" and "instance_type". Blocks are the basic container structures in HCL. A block has a type (like resource or variable), one or more labels (like "aws_instance" and "example" in the above example), and a body that contains any number of arguments or nested blocks. Arguments assign a value to a name. They're like variables in other languages. In the example above, "ami" and "instance_type" are arguments.  Just like CloudFormation had **Parameters** and **Outputs**, Terraform has **Variables** and **Outputs**.  Here is an example of what those look like in Terrform:
+
+```
+variable "VPCName" {
+  type    = string
+  default = "Wordpress on Fargate base infrastructure"
+}
+
+output "VPCId" {
+  value       = aws_vpc.wordpress_vpc.id
+  description = "VPCId of VPC"
+}
+```
+
+As mentioned above, Terraform uses modules to make core re-usable or more organized and easy to read. Terraform modules can be stored in a number of different locations. The source argument in a module block tells Terraform where to find the source code for the module. There are many different locations where you can import or keep your modules including local paths, GitHub, Bitbucket, Generic Git/Mercurial repositories, HTTP URLs, S3 buckets, and Terraform Registry.  In the code provided, the modules are stored in a local path.  Here is a snipped of how the network and database (as we showed above for Cloudformation) look like:
+
+```
+module "aws_network" {
+  source = "./modules/terraform-aws-network"
+
+  VPCName = "WordpressBlogVPC"
+}
+
+module "aws_database" {
+  source = "./modules/terraform-aws-database"
+
+  VpcId             = module.aws_network.VPCId
+  VPC_CIDR          = module.aws_network.VPC_CIDR
+  db_subnet_0       = module.aws_network.PublicSubnet0
+  db_subnet_1       = module.aws_network.PublicSubnet1
+}
+```
+In the snippet above, you can see the "source" argument which refers to the location of the module.  The "VPCNmae" is an input variable for the "aws_network" module and just as above the variables for the database module get populated out of the outputs from the network module.
+
+Terraform treats all scripts in the same directory as one unit, the separation is optional and mainly for us humans to maintain organization of our code. All script files have a ".tf" extension. 
+
+<!-- TODO: Complete in showing or writing how one runs the code using terraform. -->
+
 ## Conclusion
 
-At this point you have read about CloudFormation and Terraform and have seen the same application deployed on the same infrastructure provisioned by both tools.  The choice between Terraform and CloudFormation depends on many factors.  If you're working exclusively with AWS, CloudFormation might be the more appropriate choice. If you need to manage infrastructure across multiple cloud providers, Terraform's flexibility and multi-cloud support make it a more attractive option. Additionally, if you prefer a tool with a large open-source community and ecosystem, Terraform would be a better fit.  I hope that has given you some idea on the pros and cons of each tool, but more importantly, I hope it helps you embrace the infrastructure as code (IaC) practice.  I have mentioned multiple other tools that you can investigate for this purpose.  I will end with a quote from Mike Loukides: Infrastructure as Code. "If you’re going to do operations reliably, you need to make it reproducible and programmatic."
+At this point you have read about CloudFormation and Terraform and have seen the same application deployed on the same infrastructure provisioned by both tools.  The choice between Terraform and CloudFormation depends on many factors.  If you're working exclusively with AWS, CloudFormation might be the more appropriate choice. If you need to manage infrastructure across multiple cloud providers, Terraform's flexibility and multi-cloud support make it a more attractive option. Additionally, if you prefer a tool with a large open-source community and ecosystem, Terraform would be a better fit.  I hope that has given you some idea on the pros and cons of each tool, but more importantly, I hope it helps you embrace the infrastructure as code (IaC) practice.  I have mentioned multiple other tools that you can investigate for this purpose.  I will end with a quote from Mike Loukides regarding Infrastructure as Code: "If you’re going to do operations reliably, you need to make it reproducible and programmatic."
