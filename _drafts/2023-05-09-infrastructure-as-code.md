@@ -141,6 +141,8 @@ Now paste that URL in your browser and you should see the Wordpress application.
 
 ![Wordpress Application](/img/posts/infrastructure-as-code/WordpressApp.png)
 
+Once you are done playing with the application or the stack, if you are not interested on keeping the the application running, make sure you go to the CloudFormation service in the AWS console, select the stack and click on delete.  This way you will not incur any further charges.
+
 ### Terraform Scripts
 
 Since Terraform is a multicloud tool, it uses a provider model. Each provider is an IaC representation of a cloud or a service. Providers are responsible for understanding API interactions and exposing resources. There are hundreds of providers for Terraform, including AWS, Azure, Google Cloud, GitHub, and more. Terraform supports the use of modules to organize and reuse code. A module is a container for multiple resources used together. Terraform Registry provides numerous pre-made modules that you can use.  This is similar to our nested stacks in CloudFormation.
@@ -189,9 +191,17 @@ module "aws_database" {
 ```
 In the snippet above, you can see the "source" argument which refers to the location of the module.  The "VPCNmae" is an input variable for the "aws_network" module and just as above the variables for the database module get populated out of the outputs from the network module.
 
-Terraform treats all scripts in the same directory as one unit, the separation is optional and mainly for us humans to maintain organization of our code. All script files have a ".tf" extension. 
+Terraform treats all scripts in the same directory as one unit, the separation is optional and mainly for us humans to maintain organization of our code. All script files have a ".tf" extension. The first thing you need to do is [install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) on your machine or whichever environment you choose. Download the provided code and change directories to the terraform directory. It is recommended that you install the AWS CLI, since we are dealing with AWS resrouces here. You don't absolutely need the CLI, but you do need to configure your AWS credentials. There are multiple ways to configure these, you can use environment variables or a file a .aws directory under your home directory.  [This page](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html) shows you multiple ways to configure your AWS credentials. Once you have your credentials setup, then you need to initialize the Terraform working directory with the command "terrform init".  This will download the necessary provider plugins.  The results should look like this:
 
-<!-- TODO: Complete in showing or writing how one runs the code using terraform. -->
+![terraform init](/img/posts/infrastructure-as-code/TerraformInit.png)
+
+The "terraform plan" command allows you to check what changes terraform will make without making the changes.  This allows you to review the changes before you actual make them. Terraform will show you the resources (the ouput is too long to display) and at the end it will provide you with a summary of what it will do like this:  "Plan: 46 to add, 0 to change, 0 to destroy." It will add 47 resources for the provided code since it will start from scratch.  If you modify the template after it has been run, Terraform will let you know if it needs to delete, add or change any resources.  If you are satisfied with the plan, the command you need to install the infrastructure is "terraform apply". It will ask you to specifically enter 'yes' as a confirmation and it will start creating the resources. It will print on the screen what it is doing on each step.  Once done it will look something like this:
+
+![terraform apply](/img/posts/infrastructure-as-code/TerraformApply.png)
+
+If everything is succesful, you should be able to go to the AWS console, under EC2 service and click on LoadBalancers.  There you will find the load balancer created by the stack named "wof-load-balancer".  Copy the DNS name and put it in your browser and you should see the application pop up just as above in the CloudFormation section.  You will the application page and as I said above you can go to the [container's documentation](https://hub.docker.com/r/bitnami/wordpress/), if you are interested on learning how to configure it.
+
+Once you are done playing with the application and/or the infrastructre, remember to remove it so you don't incur in any additional cost.  In terraform you will need to run the command "terraform destroy" in order to remove all the previously created infrastructure.
 
 ## Conclusion
 
