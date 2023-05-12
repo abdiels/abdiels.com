@@ -119,8 +119,27 @@ These mappings are later use in the same file like this:
 ```
 
 There are other constructs that you should look into such as Conditions and Transform, but although I did not use those in this example, they are worth mentioning.  In order to find template reference and many other information that will help build your own CloudFormation templates please refer to the [AWS CloudFormation user guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html).  Now, let's focus on how to run the CloudFormation Templates.
+Although CloudFormation does support CLI, the templates have to be in S3 anyway so might as well go to the console to run it.  [This page has the AWS documentation for working with stacks](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html).  It covers logging in to the AWS console which is the first step.  Then go to the CloudFormation service and select create stack with new resources. This will take you to a page that looks like this:
 
-<!-- TODO: Add some screen shots and stuff here on how to run this!! -->
+![Create Stack](/img/posts/infrastructure-as-code/CreateStack.png)
+
+You can play with the designer, but for our purposes here, just click next.  In the next page, you can will be ask for the stack name.  Go ahead and give the stack a meaningful name.  I will name it "WordpressApplicationStack".  We don't need to provide any parameters the way these templates are setup.  In the next page, you have the option to add tags, permissions, stack failure options and other advanced options.  Just click next and stick the defaults.  The next page gives you an opportunity to review your choices.  Accept the acknowledgements at the end of the page and press submit.  This will start the stack creation and you will see a page like this:
+
+![Application Stack](/img/posts/infrastructure-as-code/ApplicationStack.png)
+
+This page has multiple taps, each of which shows you what is going on with the creation of the stacks.  You can go to the resources page, for example, where you will see all the different resources being created.  On the left you can see the nested stacks.  Here is an example:
+
+![Stack Resources](/img/posts/infrastructure-as-code/StackResources.png)
+
+You can click around the other tabs, some of the are self explenatory like Outputs and Parameters.  Once you see CREATE_COMPLETE, the stacks are done creating and you should be able to go into other services and see the resources created such as the VPC, the RDS database, and the ECS cluster.
+
+In order to see the application navigate to the EC2 service and click on loadbalancers on the left menu.  Select the "wof-load-balancer" load balancer and copy the DNS name.  Here is what the load balancer page looks like:
+
+![LoadBalancer](/img/posts/infrastructure-as-code/LoadBalancer.png)
+
+Now paste that URL in your browser and you should see the Wordpress application.  To know more about the application, you can read the [container's documentation](https://hub.docker.com/r/bitnami/wordpress/).  If you are actually interested on using this Wordpressa application, it has all the iformation you need to manage it including initial passwords and so on.  Here is how the page of the application looks like once you paste that load blancer URL on the browser:
+
+![Wordpress Application](/img/posts/infrastructure-as-code/WordpressApp.png)
 
 ### Terraform Scripts
 
