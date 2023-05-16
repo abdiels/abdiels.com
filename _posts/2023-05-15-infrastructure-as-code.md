@@ -2,7 +2,7 @@
 layout: post
 title: "Infrastructure as Code (IaC)"
 subtitle: "with CloudFormation and Terraform."
-background: '/img/posts/aws-lift-and-shift/post-header.png'
+background: '/img/posts/infrastructure-as-code/post-header.png'
 ---
 
 ## Introduction
