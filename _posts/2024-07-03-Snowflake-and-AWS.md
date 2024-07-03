@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Snowflake and AWS"
+title: "Snowflake and AWS using Terraform"
 subtitle: "A Match Made in the Cloud"
 background: '/img/posts/snowflake-and-aws/post-header.webp'
 description: ""
