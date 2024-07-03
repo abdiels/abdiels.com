@@ -25,7 +25,7 @@ In the AWS account, you will need to create a Role. A policy needs to be attache
 the S3 bucket.  The Role will also establish a trust relationship with Snowflake's storage integration.  We need to 
 create the storage integration in Snowflake.  
 
-The Storage integration will the Role's ARN, and once created, it will provide us with the IAM_USER_ARN and the External_ID 
+The Storage integration will need the Role's ARN, and once created, it will provide us with the IAM_USER_ARN and the External_ID 
 that must be put in the previously created Role in AWS.  In addition, we need to create an external storage where we can leverage 
 the access from the storage integration to access the files in the S3 bucket.  The external storage is then able to 
 List/Write/Read files from the S3 bucket.  
@@ -110,13 +110,13 @@ Here is the terraform for the Snowpipe and the file format:
 
 ## Running Terraform
 As you know, I am a firm believer on automating everything, so as shown above I went with Terraform to create the infrastructure
-for this post instead of doing it manually from the console.  The Snowflake wiki in medium shows how to this same process
+for this post instead of doing it manually from the console.  The Snowflake wiki in medium shows how to do this same process
 in the console if you are interested in doing it that way.  You can find such article [here](https://snowflakewiki.medium.com/connecting-snowflake-to-aws-ef7b6de1d6aa).
 The full terraform code for this post can be found [here](https://github.com/abdiels/TerraformSnowflake).  I am assuming that you have
 Terraform installed in your computer as well as AWS CLI.
 
 Before you can run this terraform script, you will need to install SnowSQL.  SnowSQL is a CLI client provided by Snowflake.
-I used to update the integration once we get the real role information.  You can use this [link](https://docs.snowflake.com/en/user-guide/snowsql-install-config) to install 
+I used it to update the integration once we get the real role information.  You can use this [link](https://docs.snowflake.com/en/user-guide/snowsql-install-config) to install 
 SnowSQL if you don't have it already.  Once that is installed, you can proceed to initialize the Terraform working 
 directory with the command "terraform init".
 
