@@ -164,6 +164,6 @@ Terraform and using Snowpipe for automated data ingestion, we've created a strea
 and scalability.
 
 I hope you found this post informative and gained valuable insights into setting up and using Snowflake with AWS. Stay 
-tuned for the [next post](2024-08-28-Snowflake-transformation.md), where we'll explore data transformation in more 
+tuned for the [next post]({% link _posts/2024-08-28-Snowflake-transformation.md %}), where we'll explore data transformation in more 
 detail. Keep reading, keep learning, and continue leveraging the power of cloud-based data solutions to drive your 
 projects forward!

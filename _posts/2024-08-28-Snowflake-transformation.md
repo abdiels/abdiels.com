@@ -7,10 +7,10 @@ description: ""
 ---
 
 ## Introduction
-In the [previous post](2024-07-03-Snowflake-and-AWS.md), we explored integrating Snowflake with AWS, specifically 
-focusing on loading files from S3 into Snowflake. The data was left in a staging table. This time, we'll take the next 
-step by moving the data into structured tables. We'll build a data pipeline that leverages streams and tasks to 
-transform the data as needed.
+In the [previous post]({% link _posts/2024-07-03-Snowflake-and-AWS.md %}), we explored integrating Snowflake 
+with AWS, specifically focusing on loading files from S3 into Snowflake. The data was left in a staging table. This 
+time, we'll take the next step by moving the data into structured tables. We'll build a data pipeline that leverages 
+streams and tasks to transform the data as needed.
 
 ## A Bit on Architectural Decisions
 Before diving into the implementation, let's discuss the different ways to access data in an external stage and consider
@@ -109,7 +109,7 @@ appropriate warehouse size internally and dynamically adjust as the task runs.
 
 The script is ready, and all we need to do is run Terraform. Running the "terraform apply" command will create all the 
 infrastructure mentioned above. If you have any doubts about running Terraform or the prerequisites needed for this 
-project, you can refer to the [previous post](2024-07-03-Snowflake-and-AWS.md) or the 
+project, you can refer to the [previous post]({% link _posts/2024-07-03-Snowflake-and-AWS.md %}) or the 
 [GitHub repository](https://github.com/abdiels/TerraformSnowflake) README.md file, which also discusses dependencies.
 
 After the Terraform script is run, this is what the new items in Snowflake will look like:
